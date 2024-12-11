@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <script>
+        // This function sends a POST request with an action and sends the refresh_token as a cookie
+        function postAction(action) {
+            // Get the refresh_token from the browser cookies
+            const refresh_token = getCookie("refresh_token");
+
+            // If the refresh_token is not available, show an alert or redirect to login
+            if (!refresh_token) {
+                alert("You are not logged in. Redirecting to login page.");
+                window.location.href = "/login"; // Redirect to login page
+                return;
+            }
+
+            // Prepare the form data
+            const formData = new FormData();
+            formData.append("action", action);
+
+            // Send the POST request
+            fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded", // Set content type for the form submission
+                    "Cookie": "refresh_token=" + refresh_token // Attach the refresh_token as a cookie
+                },
+                body: new URLSearchParams(formData) // Converts the FormData into URL-encoded format
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Refresh the page after the action is successful
+                } else {
+                    alert("Failed to perform the action.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // Helper function to get a cookie value by name
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+    </script>
+</head>
+<body>
+    <h1>Home Page</h1>
+    
+    <!-- Example: Button for performing an action -->
+    <button onclick="postAction('create_post')">Create Post</button>
+    <button onclick="postAction('post_comment')">Post Comment</button>
+    <button onclick="postAction('delete_comment')">Delete Comment</button>
+    <button onclick="postAction('delete_post')">Delete Post</button>
+    <button onclick="postAction('like_post')">Like Post</button>
+
+    <div id="message"></div>
+    
+</body>
+</html>
