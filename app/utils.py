@@ -10,7 +10,7 @@ jwt=JWTManager()
 
 db = SQL('sqlite:///mydatabase.db')
 
-FLASK_JWT_SECRET_KEY2='50890fe1069a1f43b82d4f12'
+FLASK_JWT_SECRET_KEY2='examlekeyhere'
 
 def getusername(user_id):
     user = db.execute('SELECT username FROM users WHERE id = ?', user_id)
