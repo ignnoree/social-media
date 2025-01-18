@@ -1,2 +1,2 @@
 # social-media
-simple social media app with flask
+simple social media Backend
