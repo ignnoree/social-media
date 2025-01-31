@@ -1,2 +1,2 @@
 # social-media
-simple social media Backend
+simple social media
