@@ -4,6 +4,9 @@ from flask_jwt_extended import get_jwt_identity,jwt_required
 from app.utils import safe_query,getusername
 from flask_wtf.csrf import CSRFProtect
 from app import cache
+
+
+
 bp = Blueprint('setting', __name__,url_prefix='/setting')
 
 def edit_bio(username,bio):

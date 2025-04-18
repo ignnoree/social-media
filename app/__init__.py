@@ -14,8 +14,8 @@ from datetime import timedelta
 from datetime import timezone
 from flask_wtf.csrf import CSRFProtect
 from flask_caching import Cache
-
-db = SQL('sqlite:///mydatabase.db')
+from .utils import db
+from .config.dbchema import initialize_all
 socketio = SocketIO()
 csrf = None 
 cache = Cache()
@@ -24,18 +24,17 @@ def create_app():
     app.secret_key = 'd4160787ec22be41ffce4658942c0d94700acab31f8ed5af71ecbb911e7de63c'
     app.config['DEBUG'] = True
     csrf = CSRFProtect(app)
+    initialize_all()
     db.execute('PRAGMA foreign_keys = ON')
-    
-    
-    jwt = JWTManager(app)
-    from .routes import auth_routes, home_routes, profile_routes, direct_routes,setting_routes
+    jwt.init_app(app) 
+    from .routes import auth_routes, home_routes, profile_routes, direct_routes,settings
    
     app.register_blueprint(auth_routes.bp)
     app.register_blueprint(home_routes.bp)
     app.register_blueprint(profile_routes.bp)
     app.register_blueprint(direct_routes.bp)
-    app.register_blueprint(setting_routes.bp)
-    csrf.exempt(setting_routes.bp)
+    app.register_blueprint(settings.bp)
+    csrf.exempt(settings.bp)
     csrf.exempt(auth_routes.bp)
 
    
@@ -46,6 +45,7 @@ def create_app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 7 * 24 * 60 * 60 
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False  
+    app.config['JWT_REFRESH_COOKIE_PATH'] = '/' 
 
    
     jwt.init_app(app)

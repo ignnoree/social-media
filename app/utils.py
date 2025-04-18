@@ -3,12 +3,56 @@ from flask import  request,jsonify
 from cs50 import SQL
 from sqlite3 import DatabaseError
 from flask_jwt_extended import JWTManager
+import uuid
+from datetime import datetime,timedelta
+from flask_jwt_extended import decode_token,create_access_token,get_jwt_identity,set_access_cookies,unset_jwt_cookies,create_access_token,create_refresh_token,jwt_required, verify_jwt_in_request,get_jwt
 
 
 jwt=JWTManager()
 
 
-db = SQL('sqlite:///mydatabase.db')
+def create_tokens(ident,response):
+    access_expire = timedelta(hours=1)
+
+    refresh_expire=timedelta(days=30)
+    access_expire_db= datetime.now() + access_expire
+    refresh_expire_db=datetime.now()+refresh_expire
+    session_id=str(uuid.uuid4())
+    access_jti=str(uuid.uuid4())
+    refresh_jti=str(uuid.uuid4())
+
+    access_token = create_access_token(identity=ident,additional_claims={"jti":access_jti,"session_id":session_id},expires_delta=access_expire)
+    refresh_token = create_refresh_token(identity=ident, additional_claims={"jti":refresh_jti,"session_id":session_id},expires_delta=refresh_expire)
+
+
+    expires = datetime.now() + timedelta(days=30)
+    set_access_cookies(response, access_token)
+    response.set_cookie('refresh_token_cookie', refresh_token, httponly=True, secure=True,expires=expires)
+    safe_query('''
+        INSERT INTO sessions (id,user_id, accesstoken, refreshtoken, ip, useragent, jti, refresh_jti,access_expire,refresh_expire)
+        VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)''',session_id,
+        ident, access_token, refresh_token,
+        request.remote_addr, request.headers.get('User-Agent'),
+        access_jti, refresh_jti,str(access_expire_db),str(refresh_expire_db)
+        
+    )
+    return response
+    
+    
+
+@jwt.token_in_blocklist_loader
+def check_if_token_revoked(jwt_header, jwt_payload):
+    
+    jti = jwt_payload["jti"]
+  
+    token = safe_query("select * from blacklistedtokens where jti = ?", jti)
+    
+    if token:
+        return True
+    return False
+
+db = SQL('sqlite:///D:/Downloads/projects/socialmedia/social-media/app/mydatabase.db')
+
 
 FLASK_JWT_SECRET_KEY2='examlekeyhere'
 
@@ -258,7 +302,7 @@ def safe_query(query,*params):
     try:
         return db.execute(query,*params)
     except DatabaseError as e:
-         print(f"Database error: {e}")
+        
          return "database error!",404
 
 def get_user_id(username):

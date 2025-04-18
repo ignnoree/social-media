@@ -4,27 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #111827;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            transition: border 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #6366f1;
+            outline: none;
+            background-color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #4f46e5;
+        }
+
+        #errorMessage {
+            margin-top: 1rem;
+            text-align: center;
+            color: #dc2626;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h2>Login</h2>
-    <form id="loginForm" method="POST">
-        <div>
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div>
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Login</button>
-    </form>
-
-    <div id="errorMessage" style="color:red; display:none;">Invalid login credentials</div>
+    <div class="login-container">
+        <h2>Welcome Back</h2>
+        <form id="loginForm" method="POST">
+            <div>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <div id="errorMessage">Invalid login credentials</div>
+    </div>
 
     <script>
         const form = document.getElementById('loginForm');
         form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault();
 
             const formData = new FormData(form);
             const username = formData.get('username');
@@ -32,19 +112,14 @@
 
             const response = await fetch('/login', {
                 method: 'POST',
-                body: new URLSearchParams({
-                    username: username,
-                    password: password
-                }),
+                body: new URLSearchParams({ username, password }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Redirect to home page upon successful login
                 window.location.href = '/';
             } else {
-                // Show error message if login fails
                 document.getElementById('errorMessage').style.display = 'block';
             }
         });
