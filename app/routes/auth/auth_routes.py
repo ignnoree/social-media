@@ -186,3 +186,5 @@ def refresh():
     db.execute("insert into blacklistedtokens (jti,token_type,expires_at) VALUES (?,?,?)", old_access_jti,"access_token",refresh_exp) 
     safe_query("delete from sessions where refresh_jti=?",old_refresh_jti)
     return create_tokens(ident,jsonify({"msg":"token refreshed"}))
+
+
